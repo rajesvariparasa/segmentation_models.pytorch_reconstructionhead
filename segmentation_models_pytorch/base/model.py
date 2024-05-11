@@ -6,6 +6,10 @@ class SegmentationModel(torch.nn.Module):
     def initialize(self):
         init.initialize_decoder(self.decoder)
         init.initialize_head(self.segmentation_head)
+
+        if self.reconstruction_head is not None:           #Edited for reconstruction head
+            init.initialize_head(self.reconstruction_head) 
+
         if self.classification_head is not None:
             init.initialize_head(self.classification_head)
 
@@ -30,6 +34,11 @@ class SegmentationModel(torch.nn.Module):
         decoder_output = self.decoder(*features)
 
         masks = self.segmentation_head(decoder_output)
+
+        if self.reconstruction_head is not None:
+            images = self.reconstruction_head(decoder_output) #Edited for reconstruction head
+            return masks, images
+            
 
         if self.classification_head is not None:
             labels = self.classification_head(features[-1])
